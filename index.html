@@ -35,7 +35,6 @@
         .status-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; background: #5865F2; color: white; margin-bottom: 10px; }
         .history-list { font-size: 12px; color: #888; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
         
-        /* 修正對齊：使用等寬字體確保時間寬度一致 */
         #logContent {
             font-family: 'Courier New', Courier, monospace;
             white-space: pre;
@@ -52,7 +51,7 @@
 
     <div class="input-group">
         <label>目前等候順位</label>
-        <input type="number" id="currentRank" min="0" placeholder="例如: 5432" onkeydown="if(event.key==='Enter') addSample()">
+        <input type="number" id="currentRank" min="0" placeholder="例如: 12345" onkeydown="if(event.key==='Enter') addSample()">
     </div>
     
     <button onclick="addSample()">更新順位並計算</button>
@@ -176,8 +175,7 @@
 
         document.getElementById('lastUpdate').innerText = `最後更新順位: ${rank} (${formatTime24h(new Date())})`;
         
-        // 修正對齊顯示：確保點點後面的空格一致
-        logContent.innerHTML = history.map(h => `• ${formatTime24h(new Date(h.ts))}: 序號 ${h.val}`).reverse().join('\n');
+        logContent.innerHTML = history.map(h => `• ${formatTime24h(new Date(h.ts))} 序號 ${h.val}`).reverse().join('\n');
     }
 </script>
 
