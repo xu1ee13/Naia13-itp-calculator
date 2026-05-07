@@ -43,10 +43,9 @@
     <p style="font-size: 13px; color: #888;">請每15至30分鐘更新順位數據，系統將自動計算進場時間</p>
     <p style="font-size: 13px; color: #888;">當樣本不足時，預計進場時間可能失真</p>
 
-    
     <div class="input-group">
         <label>目前等候順位</label>
-        <input type="number" id="currentRank" placeholder="例如: 5432" onkeydown="if(event.key==='Enter') addSample()">
+        <input type="number" id="currentRank" min="0" placeholder="例如: 5432" onkeydown="if(event.key==='Enter') addSample()">
     </div>
     
     <button onclick="addSample()">更新順位並計算</button>
@@ -85,7 +84,7 @@
     function addSample() {
         const rankInput = document.getElementById('currentRank');
         const rank = parseInt(rankInput.value);
-        if (isNaN(rank)) return;
+        if (isNaN(rank) || rank < 0) return;
 
         const nowMs = Date.now();
 
