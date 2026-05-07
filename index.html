@@ -153,7 +153,16 @@
         
         if (lastETA) {
             let etaDate = new Date(lastETA);
-            etaText.innerText = (lastETA - nowMs > 0) ? `預計進場: ${formatTime24h(etaDate)}` : `預計進場: ${formatTime24h(etaDate)} (已達預估時間)`;
+            let diffMs = lastETA - nowMs;
+            
+            if (diffMs > 0) {
+                let totalMinutes = Math.floor(diffMs / 60000);
+                let hours = Math.floor(totalMinutes / 60);
+                let mins = totalMinutes % 60;
+                etaText.innerText = `預計進場: ${formatTime24h(etaDate)} (剩餘 ${hours} 小時 ${mins} 分鐘)`;
+            } else {
+                etaText.innerText = `預計進場: ${formatTime24h(etaDate)} (已達預估時間)`;
+            }
         } else {
             etaText.innerText = `計算中... (還需要 ${3 - history.length} 筆資料)`;
         }
