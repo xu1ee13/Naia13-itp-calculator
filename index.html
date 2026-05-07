@@ -34,6 +34,13 @@
         #result { margin-top: 20px; padding: 15px; border-radius: 8px; background: #eef2ff; display: none; }
         .status-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; background: #5865F2; color: white; margin-bottom: 10px; }
         .history-list { font-size: 12px; color: #888; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
+        
+        /* 修正對齊：使用等寬字體確保時間寬度一致 */
+        #logContent {
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
@@ -41,7 +48,7 @@
 <div class="card">
     <h2>進場計算機</h2>
     <p style="font-size: 13px; color: #888;">請每15至30分鐘更新順位數據，系統將自動計算進場時間</p>
-    <p style="font-size: 13px; color: #888;">當樣本不足或取樣間隔過短時，預計進場時間可能失真</p>
+    <p style="font-size: 13px; color: #888;">當樣本不足時，預計進場時間可能失真</p>
 
     <div class="input-group">
         <label>目前等候順位</label>
@@ -168,7 +175,9 @@
         }
 
         document.getElementById('lastUpdate').innerText = `最後更新順位: ${rank} (${formatTime24h(new Date())})`;
-        logContent.innerHTML = history.map(h => `<div>• ${formatTime24h(new Date(h.ts))}: 序號 ${h.val}</div>`).reverse().join('');
+        
+        // 修正對齊顯示：確保點點後面的空格一致
+        logContent.innerHTML = history.map(h => `• ${formatTime24h(new Date(h.ts))}: 序號 ${h.val}`).reverse().join('\n');
     }
 </script>
 
