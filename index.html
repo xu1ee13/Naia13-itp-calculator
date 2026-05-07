@@ -92,7 +92,7 @@
         if (history.length > 0) {
             let lastRank = history[history.length - 1].val;
             if (rank > lastRank + 100) { 
-                if (confirm("是否要清空舊數據重新計算？")) {
+                if (confirm("新樣本大於前次數據，是否要清空舊數據重新計算？")) {
                     history = [];
                     lastETA = null;
                 }
