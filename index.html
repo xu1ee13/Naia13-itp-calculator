@@ -4,51 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>排隊進場預估計算器</title>
-<style>
-    body { font-family: -apple-system, sans-serif; background: #f4f4f9; padding: 20px; display: flex; justify-content: center; }
-    .card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-    h2 { color: #333; margin-top: 0; }
-    .input-group { margin-bottom: 15px; }
-    label { display: block; margin-bottom: 5px; font-size: 14px; color: #666; }
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    input[type=number] {
-      -moz-appearance: textfield; /* Firefox */
-      width: 100%; 
-      padding: 10px; 
-      border: 1px solid #ddd; 
-      border-radius: 6px; 
-      box-sizing: border-box; 
-      font-size: 16px;
-    }
+    <style>
+        body { font-family: -apple-system, sans-serif; background: #f4f4f9; padding: 20px; display: flex; justify-content: center; }
+        .card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { color: #333; margin-top: 0; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 14px; color: #666; }
+        
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+        input[type=number] {
+          -moz-appearance: textfield;
+          width: 100%; 
+          padding: 10px; 
+          border: 1px solid #ddd; 
+          border-radius: 6px; 
+          box-sizing: border-box; 
+          font-size: 16px;
+        }
 
-    button { width: 100%; padding: 12px; background: #5865F2; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; transition: 0.2s; margin-top: 10px; }
-    button:hover { background: #4752c4; }
-    #result { margin-top: 20px; padding: 15px; border-radius: 8px; background: #eef2ff; display: none; }
-    .status-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; background: #5865F2; color: white; margin-bottom: 10px; }
-    .history-list { font-size: 12px; color: #888; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
-</style>
+        button { width: 100%; padding: 12px; background: #5865F2; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+        button:hover { background: #4752c4; }
+        .reset-btn { background: #ed4245; margin-top: 8px; }
+        .reset-btn:hover { background: #c03537; }
+
+        #result { margin-top: 20px; padding: 15px; border-radius: 8px; background: #eef2ff; display: none; }
+        .status-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; background: #5865F2; color: white; margin-bottom: 10px; }
+        .history-list { font-size: 12px; color: #888; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
+    </style>
 </head>
 <body>
 
 <div class="card">
     <h2>進場計算機</h2>
-    <p style="font-size: 13px; color: #888;">請每隔約15至30分鐘更新目前的順位，系統將自動計算進場時間。</p>
+    <p style="font-size: 13px; color: #888;">請每隔一段時間更新目前的順位，系統將自動計算進場時間。</p>
     <p style="font-size: 13px; color: #888;">樣本足夠進場時間將越準確</p>
 
     
     <div class="input-group">
         <label>目前等候順位</label>
-        <input type="number" id="currentRank" placeholder="例如: 5432">
+        <input type="number" id="currentRank" placeholder="例如: 5432" onkeydown="if(event.key==='Enter') addSample()">
     </div>
     
     <button onclick="addSample()">更新順位並計算</button>
+    <button class="reset-btn" onclick="resetData()">清除數據 / 重新排隊</button>
 
     <div id="result">
-        <div class="status-tag">分析中</div>
+        <div class="status-tag">計算中</div>
         <div id="etaText" style="font-weight: bold; font-size: 18px; color: #2c3e50;"></div>
         <div id="lastUpdate" style="font-size: 12px; color: #666; margin-top: 5px;"></div>
         
@@ -60,7 +65,6 @@
 </div>
 
 <script>
-    // 核心邏輯參考自原始 script
     let history = [];
     let lastETA = null;
     const SAMPLE_SIZE = 15;
@@ -69,33 +73,48 @@
         return date.toLocaleTimeString('zh-TW', { hour12: false });
     }
 
+    function resetData() {
+        if (confirm("確定要清除所有排隊數據並重新開始嗎？")) {
+            history = [];
+            lastETA = null;
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('currentRank').value = "";
+        }
+    }
+
     function addSample() {
         const rankInput = document.getElementById('currentRank');
         const rank = parseInt(rankInput.value);
-        if (isNaN(rank)) return alert("請輸入有效的順位數字");
+        if (isNaN(rank)) return;
 
         const nowMs = Date.now();
+
+        if (history.length > 0) {
+            let lastRank = history[history.length - 1].val;
+            if (rank > lastRank + 100) { 
+                if (confirm("是否要清空舊數據重新計算？")) {
+                    history = [];
+                    lastETA = null;
+                }
+            }
+        }
         
-        // 1. 紀錄樣本 (模仿 STATS_INTERVAL 取樣邏輯)
         history.push({ ts: nowMs, val: rank });
         if (history.length > SAMPLE_SIZE) history.shift();
 
-        // 2. 計算線性預估
         const predictedETA = getLinearETA(rank);
         
-        // 3. 平滑處理 (Smoothing logic)
         if (predictedETA) {
             lastETA = lastETA ? (lastETA * 0.8 + predictedETA * 0.2) : predictedETA;
         }
 
         updateUI(rank, nowMs);
-        rankInput.value = ""; // 清空輸入框
+        rankInput.value = ""; 
     }
 
     function getLinearETA(rank) {
-        if (history.length < 3) return null; // 初期門檻
+        if (history.length < 3) return null;
 
-        // 樣本 > 9 筆時取最近 9 筆進行回歸分析
         let analysisSamples = history.length > 9 ? history.slice(-9) : history;
         
         let n = analysisSamples.length;
@@ -112,9 +131,8 @@
         });
 
         let slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-        if (slope >= 0) return null; // 序號沒減少則無法預測
+        if (slope >= 0) return null;
 
-        // 計算變化率與標準差以增加準確度
         let velocities = [];
         for(let i = 1; i < analysisSamples.length; i++) {
             let dv = (analysisSamples[i-1].val - analysisSamples[i].val) / ((analysisSamples[i].ts - analysisSamples[i-1].ts) / 1000);
@@ -136,14 +154,12 @@
         
         if (lastETA) {
             let etaDate = new Date(lastETA);
-            etaText.innerText = (lastETA - nowMs > 0) ? `預計進場: ${formatTime24h(etaDate)}` : `🚨 即將進場！`;
+            etaText.innerText = (lastETA - nowMs > 0) ? `預計進場: ${formatTime24h(etaDate)}` : `預計進場: ${formatTime24h(etaDate)} (已達預估時間)`;
         } else {
             etaText.innerText = `計算中... (還需要 ${3 - history.length} 筆資料)`;
         }
 
         document.getElementById('lastUpdate').innerText = `最後更新順位: ${rank} (${formatTime24h(new Date())})`;
-
-        // 更新歷史紀錄顯示
         logContent.innerHTML = history.map(h => `<div>• ${formatTime24h(new Date(h.ts))}: 序號 ${h.val}</div>`).reverse().join('');
     }
 </script>
