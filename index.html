@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ENC732MPMJ"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -37,8 +36,13 @@
 
         button { width: 100%; padding: 12px; background: #5865F2; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; transition: 0.2s; margin-top: 10px; }
         button:hover { background: #4752c4; }
-        .reset-btn { background: #ed4245; margin-top: 8px; }
+        
+        /* 按鈕組佈景 */
+        .btn-group { display: flex; gap: 8px; margin-top: 8px; }
+        .reset-btn { background: #ed4245; margin-top: 0; flex: 2; }
         .reset-btn:hover { background: #c03537; }
+        .back-btn { background: #9da3af; margin-top: 0; flex: 1; font-weight: bold; }
+        .back-btn:hover { background: #7e848f; }
 
         #result { margin-top: 20px; padding: 15px; border-radius: 8px; background: #eef2ff; display: none; }
         .status-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; background: #5865F2; color: white; margin-bottom: 10px; }
@@ -50,8 +54,8 @@
             line-height: 1.6;
         }
         .disclaimer {
-            text-align: center; /* 水平置中 */
-            width: 100%; /* 確保佔滿寬度以實現置中 */
+            text-align: center; 
+            width: 100%; 
         }
     </style>
 </head>
@@ -70,7 +74,11 @@
     </div>
     
     <button onclick="addSample()">更新順位並計算</button>
-    <button class="reset-btn" onclick="resetData()">清除數據 / 重新排隊</button>
+    
+    <div class="btn-group">
+        <button class="reset-btn" onclick="resetData()">清除數據 / 重新排隊</button>
+        <button class="back-btn" onclick="popLastSample()">←</button>
+    </div>
 
     <div id="result">
         <div class="status-tag">計算中</div>
@@ -103,6 +111,28 @@
             lastETA = null;
             document.getElementById('result').style.display = 'none';
             document.getElementById('currentRank').value = "";
+        }
+    }
+
+    function popLastSample() {
+        if (history.length === 0) {
+            alert("目前沒有任何數據可以刪除。");
+            return;
+        }
+        
+        const lastRecord = history[history.length - 1];
+        if (confirm(`確定要刪除最後一筆數據嗎？\n(順位: ${lastRecord.val}，時間: ${formatTime24h(new Date(lastRecord.ts))})`)) {
+            history.pop();
+            lastETA = null; 
+            
+            if (history.length > 0) {
+                const newLast = history[history.length - 1];
+                const predictedETA = getLinearETA(newLast.val);
+                lastETA = predictedETA;
+                updateUI(newLast.val, Date.now());
+            } else {
+                document.getElementById('result').style.display = 'none';
+            }
         }
     }
 
